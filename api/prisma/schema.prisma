@@ -1,0 +1,127 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum Role {
+  STUDENT
+  STAFF
+  SECURITY_ADMIN
+}
+
+enum ItemType {
+  LOST
+  FOUND
+}
+
+enum ItemStatus {
+  OPEN
+  AT_SECURITY_DESK
+  CLAIM_PENDING
+  RESOLVED
+  ARCHIVED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  studentId     String?        @unique
+  fullName      String
+  role          Role           @default(STUDENT)
+  items         Item[]
+  claims        Claim[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  createdAt     DateTime       @default(now())
+}
+
+model OtpCode {
+  id         String   @id @default(uuid())
+  email      String
+  codeHash   String
+  attempts   Int      @default(0)
+  consumedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
+model Item {
+  id               String                     @id @default(uuid())
+  type             ItemType
+  status           ItemStatus                 @default(OPEN)
+  title            String
+  category         String
+  description      String
+  secretPrompt     String?
+  secretAnswerHash String?
+  campusZone       String
+  custodyLocation  String?
+  imageUrl         String?
+  embedding        Unsupported("vector(384)")?
+  reporterId       String
+  reporter         User                       @relation(fields: [reporterId], references: [id])
+  claims           Claim[]
+  eventDate        DateTime
+  archivedAt       DateTime?
+  createdAt        DateTime                   @default(now())
+
+  @@index([type, status])
+  @@index([category])
+  @@index([campusZone])
+}
+
+model Claim {
+  id           String      @id @default(uuid())
+  itemId       String
+  item         Item        @relation(fields: [itemId], references: [id])
+  claimantId   String
+  claimant     User        @relation(fields: [claimantId], references: [id])
+  proofAnswer  String
+  answerMatch  Boolean?
+  pickupCode   String?     @unique
+  status       ClaimStatus @default(PENDING)
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime    @default(now())
+
+  @@unique([itemId, claimantId])
+  @@index([status])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  message   String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
