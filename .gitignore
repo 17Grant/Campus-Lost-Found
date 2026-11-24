@@ -6,3 +6,4 @@ dist/
 !.env.example
 cookies.txt
 cookies.txt
+*.cookies.txt

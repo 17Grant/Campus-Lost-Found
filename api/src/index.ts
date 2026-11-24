@@ -6,6 +6,8 @@ import { env, isProd } from './config/env';
 import { generalLimiter } from './middleware/rateLimit';
 import authRoutes from './routes/auth';
 import itemRoutes from './routes/items';
+import claimRoutes from './routes/claims';
+import adminRoutes from './routes/admin';
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use(generalLimiter);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/auth', authRoutes);
 app.use('/items', itemRoutes);
+app.use('/claims', claimRoutes);
+app.use('/admin', adminRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 
