@@ -25,3 +25,12 @@ export const otpVerifyLimiter = rateLimit({
   limit: 20,
   message: { error: 'Too many attempts. Please wait a few minutes.' },
 });
+
+// Keyed by user id, so it must run after requireAuth
+export const createItemLimiter = rateLimit({
+  ...base,
+  windowMs: 60 * 60 * 1000,
+  limit: 15,
+  keyGenerator: (req) => req.user?.id ?? 'anonymous',
+  message: { error: 'You have submitted too many reports. Please try again later.' },
+});

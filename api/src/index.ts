@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { env, isProd } from './config/env';
 import { generalLimiter } from './middleware/rateLimit';
 import authRoutes from './routes/auth';
+import itemRoutes from './routes/items';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(generalLimiter);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/auth', authRoutes);
+app.use('/items', itemRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
 

@@ -19,6 +19,7 @@ const envSchema = z.object({
   BREVO_API_KEY: z.string().min(1, 'BREVO_API_KEY is required'),
   EMAIL_FROM_ADDRESS: z.string().email(),
   EMAIL_FROM_NAME: z.string().default('Campus Lost & Found'),
+  CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
 });
 
 const parsed = envSchema.safeParse(process.env);
