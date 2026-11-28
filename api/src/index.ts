@@ -35,6 +35,7 @@ if (env.DEBUG_IP === '1') {
     res.json({
       ip: req.ip,
       ips: req.ips,
+      trustProxyHops: app.get('trust proxy'),
       forwardedFor: req.headers['x-forwarded-for'] ?? null,
     });
   });
@@ -76,5 +77,6 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
 app.listen(env.PORT, () => {
   console.log(`API running on http://localhost:${env.PORT} (${env.NODE_ENV})`);
+  console.log(`Trust proxy hops: ${isProd ? env.TRUST_PROXY_HOPS : 'off (development)'}`);
   startExpiryJob();
 });
