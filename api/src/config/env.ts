@@ -20,6 +20,10 @@ const envSchema = z.object({
   EMAIL_FROM_ADDRESS: z.string().email(),
   EMAIL_FROM_NAME: z.string().default('Campus Lost & Found'),
   CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
+  // Number of reverse proxies in front of the API (Render only = 1, Vercel + Render = 2)
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
+  // Set to 1 temporarily to expose /debug/ip while tuning TRUST_PROXY_HOPS
+  DEBUG_IP: z.enum(['0', '1']).default('0'),
 });
 
 const parsed = envSchema.safeParse(process.env);

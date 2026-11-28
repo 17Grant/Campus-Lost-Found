@@ -13,8 +13,8 @@ import { startExpiryJob } from './jobs/expiry';
 
 const app = express();
 
-// Behind Render's reverse proxy; needed for correct client IPs and Secure cookies
-if (isProd) app.set('trust proxy', 1);
+// Behind reverse proxies (Vercel rewrite + Render); needed for correct client IPs and Secure cookies
+if (isProd) app.set('trust proxy', env.TRUST_PROXY_HOPS);
 
 app.use(helmet());
 app.use(
@@ -28,6 +28,18 @@ app.use(cookieParser());
 app.use(generalLimiter);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Temporary diagnostics for proxy setup. Only mounted when DEBUG_IP=1.
+if (env.DEBUG_IP === '1') {
+  app.get('/debug/ip', (req, res) => {
+    res.json({
+      ip: req.ip,
+      ips: req.ips,
+      forwardedFor: req.headers['x-forwarded-for'] ?? null,
+    });
+  });
+}
+
 app.use('/auth', authRoutes);
 app.use('/items', itemRoutes);
 app.use('/claims', claimRoutes);
